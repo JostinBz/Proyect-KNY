@@ -1,106 +1,48 @@
 package com.jxtdev.knyapi.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
-
 import com.jxtdev.knyapi.dto.CharacterDTO;
-import com.jxtdev.knyapi.dto.PowerDTO;
-import com.jxtdev.knyapi.dto.RankDTO;
-import com.jxtdev.knyapi.dto.TypeCharacterDTO;
-import com.jxtdev.knyapi.entities.Character;
-import com.jxtdev.knyapi.entities.Power;
-import com.jxtdev.knyapi.entities.Rank;
-import com.jxtdev.knyapi.entities.TypeCharacter;
 import com.jxtdev.knyapi.services.CharacterService;
-import com.jxtdev.knyapi.services.PowerService;
-import com.jxtdev.knyapi.services.RankService;
-import com.jxtdev.knyapi.services.TypeCharacterService;
+import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/api/characters")
 public class CharacterController {
-
-    private final CharacterService characterService;
-    private final TypeCharacterService typeCharacterService;
-    private final RankService rankService;
-    private final PowerService powerService;
-
-    public CharacterController(CharacterService characterService,
-                               TypeCharacterService typeCharacterService,
-                               RankService rankService,
-                               PowerService powerService) {
-        this.characterService = characterService;
-        this.typeCharacterService = typeCharacterService;
-        this.rankService = rankService;
-        this.powerService = powerService;
-    }
+    @Autowired
+    private CharacterService characterService;
 
     @GetMapping
-    public ResponseEntity<List<Character>> getAllCharacters() {
-        List<Character> characters = characterService.getAllCharacters();
-        return ResponseEntity.ok(characters);
+    public ResponseEntity<List<CharacterDTO>> getAllCharacters() {
+        List<CharacterDTO> characters = characterService.getAllCharacters();
+        return new ResponseEntity<>(characters, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Character> getCharacterById(@PathVariable Long id) {
-        Character character = characterService.getCharacter(id);
-        return ResponseEntity.ok(character);
+    public ResponseEntity<CharacterDTO> getCharacterById(@PathVariable Long id) {
+        CharacterDTO character = characterService.getCharacter(id);
+        return new ResponseEntity<>(character, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<String> createCharacter(@RequestBody CharacterDTO characterDTO) {
-        try {
-            // Obtener y asignar TypeCharacter
-            TypeCharacterDTO typeCharacterDTO = characterDTO.getTypeCharacter();
-            TypeCharacter typeCharacter = typeCharacterService.findById(typeCharacterDTO.getId());
-
-            // Obtener y asignar Rank
-            RankDTO rankDTO = characterDTO.getRankCharacter();
-            Rank rank = rankService.findById(rankDTO.getId());
-
-            // Obtener y asignar Powers
-            List<PowerDTO> powerDTOs = characterDTO.getPowers();
-            List<Power> powers = powerService.findAllByIds(powerDTOs.stream()
-            .map(PowerDTO::getId).toList());
-
-            // Convertir DTO a entidad Character
-            Character character = Character.builder()
-            .name(characterDTO.getName())
-            .description(characterDTO.getDescription())
-            .imageUrl(characterDTO.getImageUrl())
-            .powers(powers)
-            .rank(rank)
-            .type(typeCharacter)
-            .build();
-
-            // Guardar el personaje en la base de datos
-            characterService.addCharacter(character);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("Character created successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create character: " + e.getMessage());
-        }
+    public ResponseEntity<CharacterDTO> createCharacter(@RequestBody @Valid CharacterDTO characterDTO) {
+        CharacterDTO newCharacter = characterService.addCharacter(characterDTO);
+        return new ResponseEntity<>(newCharacter, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Character> updateCharacter(@PathVariable Long id, @RequestBody Character characterDetails) {
-        Character updatedCharacter = characterService.updateCharacter(id, characterDetails);
-        return ResponseEntity.ok(updatedCharacter);
+    public ResponseEntity<CharacterDTO> updateCharacter(@PathVariable Long id, @RequestBody @Valid CharacterDTO characterDTO) {
+        CharacterDTO updatedCharacter = characterService.updateCharacter(id, characterDTO);
+        return new ResponseEntity<>(updatedCharacter, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCharacter(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCharacter(@PathVariable Long id) {
         characterService.deleteCharacterById(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>("Character successfully removed", HttpStatus.NO_CONTENT);
     }
 }

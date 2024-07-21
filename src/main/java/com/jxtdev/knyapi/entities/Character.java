@@ -15,6 +15,9 @@ public class Character {
     private Long id;
 
     private String name;
+    private int age;
+    private String gender;
+    private double height;
     @Column(columnDefinition = "TEXT")
     private String description;
     private String imageUrl;
@@ -28,10 +31,6 @@ public class Character {
     private Rank rank;
 
     @ManyToMany
-    @JoinTable(
-        name = "character_power",
-        joinColumns = @JoinColumn(name = "character_id"),
-        inverseJoinColumns = @JoinColumn(name = "power_id")
-    )
+    @JoinTable(name = "character_power")
     private List<Power> powers;
 }

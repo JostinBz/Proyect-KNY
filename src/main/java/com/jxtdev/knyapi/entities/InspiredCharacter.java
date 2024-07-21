@@ -3,12 +3,16 @@ package com.jxtdev.knyapi.entities;
 import java.util.List;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "inspired_characters")
 public class InspiredCharacter {
     @Id
@@ -16,6 +20,9 @@ public class InspiredCharacter {
     private Long id;
 
     private String name;
+    private int age;
+    private String gender;
+    private double height;
     private String description;
     private String imageUrl;
 

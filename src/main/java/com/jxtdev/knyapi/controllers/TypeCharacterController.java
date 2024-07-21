@@ -6,10 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.jxtdev.knyapi.dto.TypeCharacterDTO;
-import com.jxtdev.knyapi.entities.TypeCharacter;
 import com.jxtdev.knyapi.services.TypeCharacterService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
 
 
 @RestController
@@ -18,50 +17,38 @@ public class TypeCharacterController {
     @Autowired
     private TypeCharacterService typeCharacterService;
 
-
     @PostMapping
-    public ResponseEntity<String> createTypeCharacter(@RequestBody TypeCharacterDTO typeCharacterDTO) {
-        try {
-            TypeCharacter typeCharacter = typeCharacterService.findByName(typeCharacterDTO.getName());
-
-            if (typeCharacter == null) {
-                // Si no existe, crear uno nuevo
-                typeCharacter = TypeCharacter.builder()
-                        .name(typeCharacterDTO.getName())
-                        .description(typeCharacterDTO.getDescripcion())
-                        .build();
-
-                typeCharacterService.addCharacter(typeCharacter);
-                return ResponseEntity.status(HttpStatus.CREATED).body("TypeCharacter created successfully");
-            } else {
-                // Si ya existe, retornar un mensaje indicando que ya existe
-                return ResponseEntity.status(HttpStatus.OK).body("TypeCharacter already exists");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to create TypeCharacter: " + e.getMessage());
-        }
+    public ResponseEntity<TypeCharacterDTO> createTypeCharacter(@RequestBody @Valid TypeCharacterDTO typeCharacterDTO) {
+        TypeCharacterDTO newTypeCharacter = typeCharacterService.addCharacter(typeCharacterDTO);
+        return new ResponseEntity<>(newTypeCharacter, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<TypeCharacter>> getAllTypeCharacters() {
-        try {
-            List<TypeCharacter> typeCharacters = typeCharacterService.findAll();
-            return ResponseEntity.ok().body(typeCharacters);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-        
+    public ResponseEntity<List<TypeCharacterDTO>> getAllTypeCharacters() {
+        List<TypeCharacterDTO> typeCharacters = typeCharacterService.findAll();
+        return new ResponseEntity<>(typeCharacters, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TypeCharacter> getTypeCharacterById(@PathVariable Long id) {
+    public ResponseEntity<TypeCharacterDTO> getTypeCharacterById(@PathVariable Long id) {
         try {
-            TypeCharacter typeCharacter = typeCharacterService.findById(id);
-            return ResponseEntity.ok().body(typeCharacter);
+            TypeCharacterDTO typeCharacter = typeCharacterService.findById(id);
+            return new ResponseEntity<>(typeCharacter, HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TypeCharacterDTO> updateTypeCharacter(@PathVariable Long id, @RequestBody TypeCharacterDTO typeCharacterDTO) {
+        TypeCharacterDTO updatedTypeCharacter = typeCharacterService.updateTypeCharacter(id, typeCharacterDTO);
+        return new ResponseEntity<>(updatedTypeCharacter, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteTypeCharacter(@PathVariable Long id) {
+        typeCharacterService.deleteSkill(id);
+        return new ResponseEntity<>("Type character successfully removed", HttpStatus.NO_CONTENT);
+    }
 }
+

@@ -6,4 +6,6 @@ import com.jxtdev.knyapi.entities.Character;
 
 @Repository
 public interface CharacterRepository extends JpaRepository<Character, Long> {
+
+    Character findByName(String name);
 }

@@ -1,54 +1,121 @@
 package com.jxtdev.knyapi.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.jxtdev.knyapi.repositories.CharacterRepository;
+import com.jxtdev.knyapi.repositories.*;
+import com.jxtdev.knyapi.dto.CharacterDTO;
+import com.jxtdev.knyapi.dto.PowerDTO;
 import com.jxtdev.knyapi.entities.Character;
+import com.jxtdev.knyapi.entities.Power;
+import com.jxtdev.knyapi.entities.Rank;
+import com.jxtdev.knyapi.entities.TypeCharacter;
 
 @Service
-public class CharacterService{
+public class CharacterService {
     @Autowired
     private CharacterRepository characterRepository;
 
-    public List<Character> getAllCharacters(){
-        return characterRepository.findAll();
+    @Autowired
+    private TypeCharacterRepository typeCharacterRepository;
+
+    @Autowired
+    private RankRepository rankRepository;
+
+    @Autowired
+    private PowerRepository powerRepository;
+
+
+    public List<CharacterDTO> getAllCharacters() {
+        ModelMapper modelMapper = new ModelMapper();
+        List<Character> characters = characterRepository.findAll();
+        return characters.stream()
+                .map(character -> modelMapper.map(character, CharacterDTO.class))
+                .collect(Collectors.toList());
     }
 
-    public Character getCharacter(Long id){
-        Optional<Character> character = characterRepository.findById(id);
-        return character.orElse(null);
+    public CharacterDTO getCharacter(Long id) {
+        ModelMapper modelMapper = new ModelMapper();
+        Character character = characterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Character not found with id " + id));
+        return modelMapper.map(character, CharacterDTO.class);
     }
 
-    public Character addCharacter(Character character){
-        return characterRepository.save(character);
+    public CharacterDTO addCharacter(CharacterDTO characterDTO) {
+        ModelMapper modelMapper = new ModelMapper();
+        TypeCharacter typeCharacter = typeCharacterRepository.findById(characterDTO.getTypeCharacter().getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "TypeCharacter not found with id " + characterDTO.getTypeCharacter().getId()));
+
+        Rank rank = rankRepository.findById(characterDTO.getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Rank not found with id " + characterDTO.getRankCharacter().getId()));
+
+        List<Power> powers = new ArrayList<>();
+        for (PowerDTO powerDTO : characterDTO.getPowers()) {
+            Power power = powerRepository.findById(powerDTO.getId())
+                    .orElseThrow(() -> new RuntimeException("Power not found with id " + powerDTO.getId()));
+            powers.add(power);
+        }
+
+        Character character = Character.builder()
+                .name(characterDTO.getName())
+                .age(characterDTO.getAge())
+                .gender(characterDTO.getGender())
+                .height(characterDTO.getHeight())
+                .description(characterDTO.getDescription())
+                .imageUrl(characterDTO.getImageUrl())
+                .type(typeCharacter)
+                .rank(rank)
+                .powers(powers)
+                .build();
+
+        Character savedCharacter = characterRepository.save(character);
+        return modelMapper.map(savedCharacter, CharacterDTO.class);
     }
 
-    public List<Character> addListCharacters(List<Character> characters){
-        return characterRepository.saveAll(characters);
+    public CharacterDTO updateCharacter(Long id, CharacterDTO characterDTO) {
+        Character existingCharacter = characterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Character not found with id " + id));
+
+        TypeCharacter typeCharacter = typeCharacterRepository.findById(characterDTO.getTypeCharacter().getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "TypeCharacter not found with id " + characterDTO.getTypeCharacter().getId()));
+
+        Rank rank = rankRepository.findById(characterDTO.getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Rank not found with id " + characterDTO.getRankCharacter().getId()));
+
+        List<Power> powers = new ArrayList<>();
+        for (PowerDTO powerDTO : characterDTO.getPowers()) {
+            Power power = powerRepository.findById(powerDTO.getId())
+                    .orElseThrow(() -> new RuntimeException("Power not found with id " + powerDTO.getId()));
+            powers.add(power);
+        }
+
+        existingCharacter.setName(characterDTO.getName());
+        existingCharacter.setAge(characterDTO.getAge());
+        existingCharacter.setGender(characterDTO.getGender());
+        existingCharacter.setHeight(characterDTO.getHeight());
+        existingCharacter.setDescription(characterDTO.getDescription());
+        existingCharacter.setImageUrl(characterDTO.getImageUrl());
+        existingCharacter.setType(typeCharacter);
+        existingCharacter.setRank(rank);
+        existingCharacter.setPowers(powers);
+
+        Character updatedCharacter = characterRepository.save(existingCharacter);
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(updatedCharacter, CharacterDTO.class);
     }
 
-    // Método para actualizar un personaje
-    public Character updateCharacter(Long id, Character updatedCharacter) {
-        return characterRepository.findById(id).map(character -> {
-            character.setName(updatedCharacter.getName());
-            character.setDescription(updatedCharacter.getDescription());
-            character.setType(updatedCharacter.getType());
-            character.setRank(updatedCharacter.getRank());
-            character.setImageUrl(updatedCharacter.getImageUrl());
-            character.setPowers(updatedCharacter.getPowers());
-            return characterRepository.save(character);
-        }).orElseThrow(() -> new RuntimeException("Character not found with id " + id));
-    }
-
-    public void deleteCharacterById(Long id){
-        characterRepository.deleteById(id);
-    }
-
-    public void deleteCharacter(Character character){
-        characterRepository.delete(character);;
+    public void deleteCharacterById(Long id) {
+        Character character = characterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Character not found with id " + id));
+        characterRepository.delete(character);
     }
 }
