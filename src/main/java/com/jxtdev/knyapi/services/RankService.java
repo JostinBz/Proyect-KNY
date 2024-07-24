@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jxtdev.knyapi.advice.ResourceNotFoundException;
 import com.jxtdev.knyapi.dto.RankDTO;
 import com.jxtdev.knyapi.entities.Rank;
 import com.jxtdev.knyapi.repositories.RankRepository;
@@ -21,7 +22,7 @@ public class RankService {
 
     public RankDTO findById(Long id) {
         Rank rank = rankRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rank with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rank with id " + id + " not found"));
 
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(rank, RankDTO.class);
@@ -47,7 +48,7 @@ public class RankService {
     }
 
     public RankDTO addRank(RankDTO rankDTO) {
-        if (rankRepository.findByName(rankDTO.getName()) != null) {
+        if (rankRepository.findByName(rankDTO.getName()).isPresent()) {
             throw new IllegalArgumentException("Rank with the name " + rankDTO.getName() + " already exists.");
         }
 
@@ -62,7 +63,7 @@ public class RankService {
 
     public RankDTO updateRank(Long id, RankDTO rankDTO) {
         Rank existingRank = rankRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Rank with ID " + id + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Rank with ID " + id + " not found."));
 
         existingRank.setName(rankDTO.getName());
         existingRank.setDescription(rankDTO.getDescription());
@@ -75,7 +76,7 @@ public class RankService {
 
     public void deleteRankById(Long id) {
         Rank rank = rankRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Rank with ID " + id + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Rank with ID " + id + " not found."));
         rankRepository.delete(rank);
     }
 }

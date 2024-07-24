@@ -16,5 +16,5 @@ public class TypeCharacterDTO {
     private Long id;
     @NotBlank(message = "Type character cannot be null or empty")
     private String name;
-    private String descripcion;
+    private String description;
 }

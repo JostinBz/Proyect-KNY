@@ -41,15 +41,8 @@ public class PowerController {
 
     @GetMapping
     public ResponseEntity<List<PowerDTO>> getAllPowers() {
-        ModelMapper mp = new ModelMapper();
-        List<PowerDTO> powers = powerService.findAllPowers().stream()
-                .map(power -> PowerDTO.builder()
-                        .name(power.getName())
-                        .description(power.getDescription())
-                        .skill(mp.map(power.getSkill(), SkillDTO.class))
-                        .build())
-                .toList();
-        return ResponseEntity.ok(powers);
+        List<PowerDTO> powers = powerService.findAllPowers();
+        return new ResponseEntity<>(powers,HttpStatus.OK);
     }
 
     @PostMapping

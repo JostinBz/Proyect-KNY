@@ -23,7 +23,7 @@ public class CharacterDTO {
     private int age;
     @NotBlank(message = "Type cannot be null or empty")
     private String gender;
-    private double height;
+    private String height;
     private String description;
     private String imageUrl;
     @Valid

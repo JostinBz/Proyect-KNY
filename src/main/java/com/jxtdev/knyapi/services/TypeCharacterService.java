@@ -2,6 +2,7 @@ package com.jxtdev.knyapi.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +23,18 @@ public class TypeCharacterService {
     public TypeCharacterDTO addCharacter(TypeCharacterDTO typeCharacterDTO) {
         Optional<TypeCharacter> typeCharacter = this.typeCharacterRepository.findByName(typeCharacterDTO.getName());
 
-        if (!typeCharacter.isPresent()) {
-            TypeCharacter typeSave = this.typeCharacterRepository.save(typeCharacter.get());
-            ModelMapper modelMapper = new ModelMapper();
-            TypeCharacterDTO newType = modelMapper.map(typeSave, TypeCharacterDTO.class);
-            return newType;
-        } else
+        if (typeCharacter.isPresent()) {
             throw new IllegalArgumentException(
                     "Character with the name " + typeCharacterDTO.getName() + " already exists.");
+        }
+        TypeCharacter type = TypeCharacter.builder()
+                .name(typeCharacterDTO.getName())
+                .description(typeCharacterDTO.getDescription())
+                .build();
+        TypeCharacter typeSave = this.typeCharacterRepository.save(type);
+        ModelMapper modelMapper = new ModelMapper();
+        TypeCharacterDTO newType = modelMapper.map(typeSave, TypeCharacterDTO.class);
+        return newType;
     }
 
     public TypeCharacterDTO updateTypeCharacter(Long id, TypeCharacterDTO typeCharacterDTO) {
@@ -58,7 +63,7 @@ public class TypeCharacterService {
 
     public TypeCharacterDTO findById(Long id) {
         TypeCharacter type = typeCharacterRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("TypeCharacter with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("TypeCharacter with id " + id + " not found"));
 
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(type, TypeCharacterDTO.class);
@@ -68,8 +73,8 @@ public class TypeCharacterService {
         List<TypeCharacter> types = typeCharacterRepository.findAll();
 
         ModelMapper modelMapper = new ModelMapper();
-        return types.stream().map(type -> modelMapper.map(types, TypeCharacterDTO.class))
-                .toList();
+         return types.stream().map(type -> modelMapper.map(type, TypeCharacterDTO.class))
+            .collect(Collectors.toList());
     }
 
 }

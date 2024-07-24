@@ -36,7 +36,7 @@ public class SkillController {
     }
 
     @PostMapping
-    public ResponseEntity<Skill> createCharacter(@RequestBody @Valid SkillDTO skillDTO) {
+    public ResponseEntity<SkillDTO> createCharacter(@RequestBody @Valid SkillDTO skillDTO) {
         // Guardar el personaje en la base de datos
         return new ResponseEntity<>(this.skillService.addSkill(skillDTO), HttpStatus.CREATED);
     }

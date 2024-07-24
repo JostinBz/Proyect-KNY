@@ -24,10 +24,7 @@ public class Power {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToMany(targetEntity = Character.class)
-    private List<Character> character;
-
     @ManyToOne
-    @JoinColumn(name = "skill_id", nullable = false)
+    @JoinColumn(name = "skill_id")
     private Skill skill;
 }

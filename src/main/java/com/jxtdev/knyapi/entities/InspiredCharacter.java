@@ -34,7 +34,9 @@ public class InspiredCharacter {
     @JoinColumn(name = "rank_id", nullable = false)
     private Rank rank;
 
-    @OneToMany(targetEntity = Power.class)
-    @JoinColumn(name = "power_id", nullable = false)
+    @ManyToMany(targetEntity = Power.class, fetch = FetchType.LAZY)
+    @JoinTable(name = "inspiredcharacter_power",
+    joinColumns = @JoinColumn(name = "inspiredcharacter_id"),
+    inverseJoinColumns = @JoinColumn(name = "power_id"))
     private List<Power> powers;
 }

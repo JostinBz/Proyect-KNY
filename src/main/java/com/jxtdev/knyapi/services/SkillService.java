@@ -1,6 +1,8 @@
 package com.jxtdev.knyapi.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,7 @@ public class SkillService {
 
     public SkillDTO findById(Long id) {
         Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rank with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rank with id " + id + " not found"));
 
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(skill, SkillDTO.class);
@@ -28,10 +30,10 @@ public class SkillService {
         ModelMapper modelMapper = new ModelMapper();
         return listSkill.stream()
                 .map(skill -> modelMapper.map(skill, SkillDTO.class))
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    public Skill addSkill(SkillDTO skillDTO) {
+    public SkillDTO addSkill(SkillDTO skillDTO) {
 
         if (this.skillRepository.findByName(skillDTO.getName()).isPresent()) {
             throw new IllegalArgumentException("This skill is already in use");
@@ -40,12 +42,15 @@ public class SkillService {
                 .name(skillDTO.getName())
                 .description(skillDTO.getDescription())
                 .build();
-        return this.skillRepository.save(skill);
+        Skill skillSave =  this.skillRepository.save(skill);
+        ModelMapper modelMapper = new ModelMapper();
+        SkillDTO newSkillDTO = modelMapper.map(skillSave, SkillDTO.class);
+        return newSkillDTO;
     }
 
     public SkillDTO updateSkill(Long id, SkillDTO skillDTO) {
         Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rank with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rank with id " + id + " not found"));
 
         skill.setName(skillDTO.getName());
         skill.setDescription(skillDTO.getDescription());
