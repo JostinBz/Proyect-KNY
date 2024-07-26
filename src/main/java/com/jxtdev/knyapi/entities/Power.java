@@ -1,7 +1,5 @@
 package com.jxtdev.knyapi.entities;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

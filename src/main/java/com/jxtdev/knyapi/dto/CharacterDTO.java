@@ -1,6 +1,8 @@
 package com.jxtdev.knyapi.dto;
 
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(name = "Character")
 public class CharacterDTO {
     private Long id;
     @NotBlank(message = "Type cannot be null or empty")

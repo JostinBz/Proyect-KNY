@@ -1,6 +1,8 @@
 package com.jxtdev.knyapi.dto;
 
 import org.springframework.validation.annotation.Validated;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Validated
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(name = "Types Character")
 public class TypeCharacterDTO {
     private Long id;
     @NotBlank(message = "Type character cannot be null or empty")

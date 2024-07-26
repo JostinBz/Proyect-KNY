@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
 import com.jxtdev.knyapi.advice.ResourceNotFoundException;
 import com.jxtdev.knyapi.dto.PowerDTO;
 import com.jxtdev.knyapi.entities.Power;
