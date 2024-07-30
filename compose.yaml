@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -10,6 +10,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    datasource:
+      url: ${DB_URL}
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
     environment:
       - DB_URL=jdbc:mysql://db:3306/knydb
       - DB_USERNAME=root
